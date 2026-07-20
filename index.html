@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — Social Media Analytics Tracker</title>
+<style>
+/* ============================================================
+   PULSE — Social Media Analytics Tracker
+   Single-file app: design tokens, layout, components, print.
+   ============================================================ */
+
+/* ---------- Design tokens ---------- */
+:root{
+  --bg:#F4F6F8;
+  --surface:#FFFFFF;
+  --surface-2:#F9FAFB;
+  --ink:#182230;
+  --muted:#697586;
+  --line:#E3E8EF;
+  --accent:#0F766E;          /* deep teal — primary brand */
+  --accent-ink:#0B5A54;
+  --accent-soft:#E4F3F0;
+  --amber:#B45309;
+  --amber-soft:#FDF1DF;
+  --good:#067647;
+  --good-soft:#E4F5EC;
+  --bad:#B42318;
+  --bad-soft:#FBEAE8;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 14px rgba(16,24,40,.06);
+  --shadow-lg:0 8px 30px rgba(16,24,40,.14);
+  --radius:14px;
+  --radius-sm:10px;
+  --font:"Segoe UI","Avenir Next",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0E1319;
+  --surface:#171D26;
+  --surface-2:#1D2530;
+  --ink:#E7EDF4;
+  --muted:#8A96A6;
+  --line:#2A3442;
+  --accent:#37BEAC;
+  --accent-ink:#7FDCCF;
+  --accent-soft:#12332F;
+  --amber:#E8A33D;
+  --amber-soft:#33270F;
+  --good:#4ADE80;
+  --good-soft:#10301D;
+  --bad:#F97066;
+  --bad-soft:#3A1512;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.5);
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  transition:background .25s ease,color .25s ease;
+}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+h1,h2,h3{letter-spacing:-.015em}
+.num{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---------- Header ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  padding:0 28px;
+  display:flex;align-items:center;gap:18px;height:62px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;white-space:nowrap}
+.brand-mark{
+  width:30px;height:30px;border-radius:9px;background:var(--accent);
+  display:grid;place-items:center;color:#fff;flex:none;
+}
+.brand-mark svg{width:18px;height:18px}
+.brand small{font-weight:500;color:var(--muted);font-size:12px;display:block;line-height:1.1}
+.search-wrap{flex:1;max-width:420px;position:relative}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+#searchInput{
+  width:100%;padding:8px 12px 8px 34px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-2);outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+#searchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:var(--radius-sm);padding:8px 14px;font-size:13.5px;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background .15s,border-color .15s,transform .1s,box-shadow .15s;
+}
+.btn:hover{background:var(--surface-2);border-color:var(--muted)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,#searchInput:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn svg{width:15px;height:15px}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-ink);border-color:var(--accent-ink);color:#fff}
+[data-theme="dark"] .btn-primary{color:#06211E}
+[data-theme="dark"] .btn-primary:hover{color:#06211E;filter:brightness(1.08);background:var(--accent);border-color:var(--accent)}
+.btn-danger{color:var(--bad)}
+.btn-danger:hover{background:var(--bad-soft);border-color:var(--bad)}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-sm{padding:5px 10px;font-size:12.5px;border-radius:8px}
+.icon-btn{width:36px;height:36px;padding:0;justify-content:center;border-radius:10px}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  display:flex;gap:4px;padding:10px 28px 0;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  position:sticky;top:62px;z-index:40;overflow-x:auto;
+}
+.tab{
+  border:none;background:none;color:var(--muted);font-weight:600;font-size:14px;
+  padding:10px 14px 12px;border-bottom:2.5px solid transparent;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;transition:color .15s;
+}
+.tab svg{width:16px;height:16px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+[data-theme="dark"] .tab.active{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+/* ---------- Layout ---------- */
+.container{max-width:1320px;margin:0 auto;padding:22px 28px 80px}
+.section{display:none;animation:fadeUp .3s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 16px;flex-wrap:wrap}
+.section-head h2{font-size:20px}
+.section-head p{color:var(--muted);font-size:13px;margin-top:2px}
+
+/* ---------- Filter bar ---------- */
+.filterbar{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:12px 14px;margin-bottom:20px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.field select,.field input{
+  border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--surface-2);
+  min-width:118px;outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.field select:focus,.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.filterbar .spacer{flex:1}
+#activeFilterCount{font-size:12px;color:var(--muted);align-self:center}
+
+/* ---------- KPI cards ---------- */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.kpi{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px;position:relative;overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease;
+  animation:fadeUp .35s ease backwards;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.kpi .kpi-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi .kpi-label svg{width:14px;height:14px;color:var(--accent)}
+.kpi .kpi-value{font-size:25px;font-weight:700;margin-top:6px;line-height:1.15;word-break:break-word}
+.kpi .kpi-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi.kpi-text .kpi-value{font-size:19px}
+.kpi.kpi-good .kpi-value{color:var(--good)}
+.kpi.kpi-bad .kpi-value{color:var(--bad)}
+
+/* ---------- Cards / panels ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px 20px;margin-bottom:18px;
+}
+.card h3{font-size:15px;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.card h3 svg{width:16px;height:16px;color:var(--accent)}
+.card .card-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+/* ---------- Charts ---------- */
+.chart-box{min-height:120px}
+.chart-box svg{width:100%;height:auto;display:block}
+.hbar-row{display:grid;grid-template-columns:130px 1fr 74px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
+.hbar-row .hbar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:7px}
+.hbar-track{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;height:14px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.hbar-val{text-align:right;font-weight:700;font-size:12.5px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+
+/* ---------- Tables ---------- */
+.table-wrap{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+thead th{
+  position:sticky;top:0;z-index:5;background:var(--surface-2);
+  text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap;
+}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--surface-2)}
+td.num,th.num{text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;background:var(--surface-2);border:1px solid var(--line)}
+.title-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.row-actions{display:flex;gap:4px}
+
+/* ---------- Leaderboards ---------- */
+.board{padding:0;overflow:hidden}
+.board h3{padding:16px 20px 0}
+.board .card-sub{padding:0 20px}
+.board ol{list-style:none;counter-reset:rank}
+.board li{
+  counter-increment:rank;display:grid;grid-template-columns:34px 1fr auto;gap:10px;
+  align-items:center;padding:10px 20px;border-top:1px solid var(--line);font-size:13.5px;
+}
+.board li::before{
+  content:counter(rank);width:26px;height:26px;border-radius:8px;background:var(--surface-2);
+  border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--muted);
+}
+.board li:nth-child(1)::before{background:var(--amber-soft);color:var(--amber);border-color:var(--amber)}
+.board li .b-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.board li .b-meta{font-size:11.5px;color:var(--muted);font-weight:500;display:block}
+.board li .b-val{font-weight:700}
+
+/* ---------- Insights ---------- */
+.insight{
+  display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:15px 18px;margin-bottom:12px;
+  animation:fadeUp .35s ease backwards;
+}
+.insight .i-icon{
+  width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;flex:none;
+}
+.insight .i-icon svg{width:17px;height:17px}
+.insight.warn{border-left-color:var(--amber)}
+.insight.warn .i-icon{background:var(--amber-soft);color:var(--amber)}
+.insight.neg{border-left-color:var(--bad)}
+.insight.neg .i-icon{background:var(--bad-soft);color:var(--bad)}
+.insight h4{font-size:14px;margin-bottom:2px}
+.insight p{font-size:13px;color:var(--muted)}
+
+/* ---------- Empty states ---------- */
+.empty{
+  text-align:center;padding:52px 24px;color:var(--muted);
+  border:1.5px dashed var(--line);border-radius:var(--radius);background:var(--surface);
+}
+.empty svg{width:42px;height:42px;color:var(--muted);opacity:.6;margin-bottom:10px}
+.empty h3{color:var(--ink);font-size:16px;margin-bottom:4px}
+.empty p{font-size:13px;max-width:420px;margin:0 auto 16px}
+.empty .btn{margin:0 4px}
+
+/* ---------- Modal ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(10,14,20,.5);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;z-index:100;padding:34px 16px;overflow:auto;
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);
+  width:100%;max-width:860px;animation:pop .22s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-size:16px}
+.modal-body{padding:20px 22px}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.form-grid .field input,.form-grid .field select,.form-grid .field textarea{min-width:0;width:100%}
+.field.span-2{grid-column:span 2}
+.field.span-4{grid-column:span 4}
+.field textarea{resize:vertical;min-height:56px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--surface-2)}
+.form-section-label{grid-column:span 4;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-top:6px;padding-bottom:2px;border-bottom:1px solid var(--line)}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:16px 22px;border-top:1px solid var(--line)}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translate(-50%,16px);
+  background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;
+  font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;
+  pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Print report ---------- */
+@media print{
+  body{background:#fff;font-size:12px}
+  .topbar,.tabs,.filterbar,.topbar-actions,.section-head .btn,.row-actions,.empty .btn,#fab{display:none!important}
+  .section{display:block!important;page-break-inside:avoid;animation:none}
+  .container{padding:0;max-width:none}
+  .card,.kpi,.insight,.table-wrap{box-shadow:none;border-color:#ccc}
+  .print-title{display:block!important;margin-bottom:14px}
+  .table-wrap{max-height:none;overflow:visible}
+}
+.print-title{display:none}
+.print-title h1{font-size:22px}
+.print-title p{color:var(--muted);font-size:12px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1024px){
+  .grid-3{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:repeat(2,1fr)}
+  .form-section-label,.field.span-4{grid-column:span 2}
+}
+@media (max-width:760px){
+  .topbar{padding:0 14px;gap:10px}
+  .brand span.brand-text small{display:none}
+  .container{padding:16px 14px 70px}
+  .tabs{padding:6px 10px 0}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .hbar-row{grid-template-columns:96px 1fr 64px}
+  .search-wrap{max-width:none}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://nnlprpdixgtqrqgfiwuu.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_xpd5DfhU4yXuTSL4GImapw_3WwyVuj5";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 14 10 5 14 19 17 11 21 11"/></svg>
+    </span>
+    <span class="brand-text">Pulse<small>Social Media Analytics</small></span>
+  </div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="searchInput" type="search" placeholder="Search campaigns, platforms, content, notes…" aria-label="Search records">
+  </div>
+  <div class="topbar-actions">
+    <button class="btn" id="btnExportCsv" title="Download all filtered rows as a CSV spreadsheet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>CSV
+    </button>
+    <button class="btn" id="btnExportJson" title="Download all filtered rows as JSON">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>JSON
+    </button>
+    <button class="btn" id="btnPrint" title="Open a printable performance report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M6 17v4h12v-4"/></svg>Report
+    </button>
+    <button class="btn icon-btn" id="btnTheme" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================= TABS ================= -->
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button class="tab active" data-tab="overview" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
+  <button class="tab" data-tab="data" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/></svg>Data entry</button>
+  <button class="tab" data-tab="charts" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></svg>Charts</button>
+  <button class="tab" data-tab="boards" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8m-4-4v4M5 4h14v4a7 7 0 0 1-14 0V4Z"/><path d="M5 6H3a2 2 0 0 0 2 4m14-4h2a2 2 0 0 1-2 4"/></svg>Leaderboards</button>
+  <button class="tab" data-tab="insights" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-5 3h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.5 1 2.5h6c0-1 .3-1.9 1-2.5A6 6 0 0 0 12 3Z"/></svg>Insights</button>
+</nav>
+
+<div class="container">
+  <div class="print-title">
+    <h1>Pulse — Social media performance report</h1>
+    <p id="printMeta"></p>
+  </div>
+
+  <!-- ================= FILTER BAR ================= -->
+  <div class="filterbar" id="filterbar">
+    <div class="field"><label for="fPlatform">Platform</label><select id="fPlatform"><option value="">All platforms</option></select></div>
+    <div class="field"><label for="fCampaign">Campaign</label><select id="fCampaign"><option value="">All campaigns</option></select></div>
+    <div class="field"><label for="fPillar">Content pillar</label><select id="fPillar"><option value="">All pillars</option></select></div>
+    <div class="field"><label for="fType">Post type</label><select id="fType"><option value="">All types</option></select></div>
+    <div class="field"><label for="fMonth">Month</label><select id="fMonth"><option value="">All months</option></select></div>
+    <div class="field"><label for="fQuarter">Quarter</label><select id="fQuarter"><option value="">All quarters</option><option value="1">Q1</option><option value="2">Q2</option><option value="3">Q3</option><option value="4">Q4</option></select></div>
+    <div class="field"><label for="fYear">Year</label><select id="fYear"><option value="">All years</option></select></div>
+    <div class="field"><label for="fFrom">From</label><input type="date" id="fFrom"></div>
+    <div class="field"><label for="fTo">To</label><input type="date" id="fTo"></div>
+    <div class="spacer"></div>
+    <span id="activeFilterCount"></span>
+    <button class="btn btn-sm" id="btnResetFilters" title="Clear every active filter">Reset filters</button>
+  </div>
+  <!-- ================= OVERVIEW ================= -->
+  <section class="section active" id="tab-overview">
+    <div class="section-head">
+      <div><h2>Dashboard overview</h2><p id="overviewSub">Key performance across every platform, campaign, and post.</p></div>
+      <button class="btn btn-primary" data-open-entry>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/></svg>Add post data
+      </button>
+    </div>
+    <div id="overviewEmpty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></svg>
+      <h3>No data yet</h3>
+      <p>Add your first post in Data entry, or load a sample dataset to explore every feature of the dashboard.</p>
+      <button class="btn btn-primary" data-open-entry>Add your first post</button>
+      <button class="btn" id="btnSample">Load sample data</button>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </section>
+
+  <!-- ================= DATA ENTRY ================= -->
+  <section class="section" id="tab-data">
+    <div class="section-head">
+      <div><h2>Data entry</h2><p><span id="rowCount">0</span> posts shown · saved automatically in this browser</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="btnSample2">Load sample data</button>
+        <button class="btn btn-danger" id="btnClearAll">Delete all data</button>
+        <button class="btn btn-primary" data-open-entry>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/></svg>Add post data
+        </button>
+      </div>
+    </div>
+    <div id="tableEmpty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg>
+      <h3>Your posts will appear here</h3>
+      <p>Each row tracks one post with its reach, engagement, spend, and revenue. Calculated metrics update instantly.</p>
+      <button class="btn btn-primary" data-open-entry>Add your first post</button>
+    </div>
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Platform</th><th>Campaign</th><th>Pillar</th><th>Type</th><th class="title-cell">Title</th>
+            <th class="num" title="People who saw the post at least once">Reach</th>
+            <th class="num" title="Total times the post was displayed">Impr.</th>
+            <th class="num">Likes</th><th class="num">Comments</th><th class="num">Shares</th><th class="num">Saves</th>
+            <th class="num" title="Likes + comments + shares + saves">Engagement</th>
+            <th class="num" title="Engagement ÷ reach">Eng. rate</th>
+            <th class="num">Video views</th>
+            <th class="num" title="Average watch time in seconds">Watch</th>
+            <th class="num">Profile visits</th><th class="num">Clicks</th>
+            <th class="num" title="Website clicks ÷ impressions">CTR</th>
+            <th class="num" title="Followers gained − lost">Net foll.</th>
+            <th class="num">Conv.</th><th class="num">Spend</th><th class="num">Revenue</th>
+            <th class="num" title="Revenue ÷ spend">ROAS</th>
+            <th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= CHARTS ================= -->
+  <section class="section" id="tab-charts">
+    <div class="section-head"><div><h2>Charts</h2><p>Trends and comparisons update live with your filters. Hover any point or bar for exact values.</p></div></div>
+    <div id="chartsEmpty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="3 15 8 9 13 13 21 5"/><path d="M3 21h18"/></svg>
+      <h3>Nothing to chart yet</h3>
+      <p>Add post data or load the sample dataset and this page fills with trends, comparisons, and rankings.</p>
+      <button class="btn btn-primary" data-open-entry>Add post data</button>
+    </div>
+    <div id="chartsWrap">
+      <div class="grid-2">
+        <div class="card"><h3>Engagement trend</h3><div class="card-sub">Total engagement per month</div><div class="chart-box" id="chEngagement"></div></div>
+        <div class="card"><h3>Reach trend</h3><div class="card-sub">Total reach per month</div><div class="chart-box" id="chReach"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><h3>Follower growth</h3><div class="card-sub">Cumulative net followers over time</div><div class="chart-box" id="chFollowers"></div></div>
+        <div class="card"><h3>Posting frequency</h3><div class="card-sub">Posts published per month</div><div class="chart-box" id="chFrequency"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><h3>Platform comparison</h3><div class="card-sub">Total engagement by platform</div><div class="chart-box" id="chPlatform"></div></div>
+        <div class="card"><h3>Campaign comparison</h3><div class="card-sub">Total engagement by campaign</div><div class="chart-box" id="chCampaign"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><h3>Revenue</h3><div class="card-sub">Revenue per month</div><div class="chart-box" id="chRevenue"></div></div>
+        <div class="card"><h3>ROAS by campaign</h3><div class="card-sub">Revenue ÷ spend for campaigns with spend</div><div class="chart-box" id="chRoas"></div></div>
+      </div>
+      <div class="card"><h3>Top content</h3><div class="card-sub">Highest-engagement posts in the current view</div><div class="chart-box" id="chTop"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= LEADERBOARDS ================= -->
+  <section class="section" id="tab-boards">
+    <div class="section-head"><div><h2>Leaderboards</h2><p>Automatic rankings across the current filtered view.</p></div></div>
+    <div id="boardsEmpty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8m-4-4v4M5 4h14v4a7 7 0 0 1-14 0V4Z"/></svg>
+      <h3>No rankings yet</h3>
+      <p>Once posts are added, Pulse ranks your best posts, campaigns, and platforms automatically.</p>
+      <button class="btn btn-primary" data-open-entry>Add post data</button>
+    </div>
+    <div class="grid-3" id="boardsGrid"></div>
+  </section>
+
+  <!-- ================= INSIGHTS ================= -->
+  <section class="section" id="tab-insights">
+    <div class="section-head"><div><h2>Insights</h2><p>Generated automatically from patterns in your current view.</p></div></div>
+    <div id="insightsEmpty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-5 3h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.5 1 2.5h6c0-1 .3-1.9 1-2.5A6 6 0 0 0 12 3Z"/></svg>
+      <h3>Insights need data</h3>
+      <p>Add a few posts across different platforms and post types, and Pulse will surface what's working.</p>
+      <button class="btn btn-primary" data-open-entry>Add post data</button>
+    </div>
+    <div id="insightsList"></div>
+  </section>
+</div>
+
+<!-- ================= ENTRY MODAL ================= -->
+<div class="modal-backdrop" id="entryModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add post data</h3>
+      <button class="btn btn-ghost icon-btn" id="btnCloseModal" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section-label">Post details</div>
+        <div class="field"><label for="eDate">Date *</label><input type="date" id="eDate" required></div>
+        <div class="field"><label for="ePlatform">Platform *</label>
+          <select id="ePlatform">
+            <option>Instagram</option><option>TikTok</option><option>Facebook</option><option>LinkedIn</option>
+            <option>YouTube</option><option>X (Twitter)</option><option>Pinterest</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label for="eCampaign">Campaign</label><input id="eCampaign" list="dlCampaigns" placeholder="e.g. Spring Launch"><datalist id="dlCampaigns"></datalist></div>
+        <div class="field"><label for="ePillar">Content pillar</label><input id="ePillar" list="dlPillars" placeholder="e.g. Education"><datalist id="dlPillars"></datalist></div>
+        <div class="field"><label for="eType">Post type</label>
+          <select id="eType">
+            <option>Image</option><option>Carousel</option><option>Reel / Short</option><option>Video</option>
+            <option>Story</option><option>Text</option><option>Live</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field span-2"><label for="eTitle">Content title</label><input id="eTitle" placeholder="e.g. 5 tips for better onboarding"></div>
+        <div class="field"><label for="eNotesShort" style="visibility:hidden">.</label><span style="font-size:12px;color:var(--muted)">* required fields</span></div>
+
+        <div class="form-section-label">Delivery &amp; engagement</div>
+        <div class="field"><label for="eReach">Reach</label><input type="number" min="0" id="eReach" placeholder="0"></div>
+        <div class="field"><label for="eImpressions">Impressions</label><input type="number" min="0" id="eImpressions" placeholder="0"></div>
+        <div class="field"><label for="eLikes">Likes</label><input type="number" min="0" id="eLikes" placeholder="0"></div>
+        <div class="field"><label for="eComments">Comments</label><input type="number" min="0" id="eComments" placeholder="0"></div>
+        <div class="field"><label for="eShares">Shares</label><input type="number" min="0" id="eShares" placeholder="0"></div>
+        <div class="field"><label for="eSaves">Saves</label><input type="number" min="0" id="eSaves" placeholder="0"></div>
+        <div class="field"><label for="eVideoViews">Video views</label><input type="number" min="0" id="eVideoViews" placeholder="0"></div>
+        <div class="field"><label for="eWatchTime" title="Average seconds watched per view">Avg watch time (s)</label><input type="number" min="0" step="0.1" id="eWatchTime" placeholder="0"></div>
+
+        <div class="form-section-label">Traffic, growth &amp; results</div>
+        <div class="field"><label for="eProfileVisits">Profile visits</label><input type="number" min="0" id="eProfileVisits" placeholder="0"></div>
+        <div class="field"><label for="eClicks">Website clicks</label><input type="number" min="0" id="eClicks" placeholder="0"></div>
+        <div class="field"><label for="eFollowersGained">Followers gained</label><input type="number" min="0" id="eFollowersGained" placeholder="0"></div>
+        <div class="field"><label for="eFollowersLost">Followers lost</label><input type="number" min="0" id="eFollowersLost" placeholder="0"></div>
+        <div class="field"><label for="eConversions">Conversions</label><input type="number" min="0" id="eConversions" placeholder="0"></div>
+        <div class="field"><label for="eSpend">Spend ($)</label><input type="number" min="0" step="0.01" id="eSpend" placeholder="0.00"></div>
+        <div class="field"><label for="eRevenue">Revenue ($)</label><input type="number" min="0" step="0.01" id="eRevenue" placeholder="0.00"></div>
+        <div class="field span-4"><label for="eNotes">Notes</label><textarea id="eNotes" placeholder="Anything worth remembering about this post…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="btnCancelEntry">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveEntry">Save post</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+/* ============================================================
+   PULSE — application logic
+   1. Utilities & formatting     4. Rendering (KPIs, table)
+   2. Storage & state            5. Charts (SVG + bars)
+   3. Derived metrics & filters  6. Boards, insights, export
+   ============================================================ */
+
+/* ---------- 1. Utilities & formatting ---------- */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const nCompact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
+const nFull    = new Intl.NumberFormat("en-US");
+const fmtN   = v => (v >= 10000 ? nCompact.format(v) : nFull.format(Math.round(v * 10) / 10));
+const fmtInt = v => nFull.format(Math.round(v));
+const fmtCur = v => "$" + (Math.abs(v) >= 10000 ? nCompact.format(v) : nFull.format(Math.round(v * 100) / 100));
+const fmtPct = v => (Math.round(v * 100) / 100) + "%";
+const fmtX   = v => (Math.round(v * 100) / 100) + "×";
+const fmtDur = secs => {
+  if (!secs) return "0s";
+  const m = Math.floor(secs / 60), s = Math.round(secs % 60);
+  return m ? `${m}m ${s}s` : `${s}s`;
+};
+const monthKeyOf   = d => d.slice(0, 7);                       // "2026-05"
+const MONTH_NAMES  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monthLabel   = key => { const [y, m] = key.split("-"); return MONTH_NAMES[+m - 1] + " ’" + y.slice(2); };
+const quarterOf    = d => Math.floor(+d.slice(5, 7) / 3.001) + 1;
+
+const PLATFORM_COLORS = {
+  "Instagram": "#C2418C", "TikTok": "#12B5B0", "Facebook": "#3B5FA8", "LinkedIn": "#2E6DA4",
+  "YouTube": "#C4302B", "X (Twitter)": "#4B5563", "Pinterest": "#B7081B", "Other": "#8A6FC9"
+};
+const platColor = p => PLATFORM_COLORS[p] || "#8A6FC9";
+
+/* ---------- 2. Storage & state ---------- */
+const STORE_KEY = "pulse.records.v1";
+const THEME_KEY = "pulse.theme";
+let memoryFallback = null; // used when localStorage is unavailable
+
+const storage = {
+  get(key) { try { return localStorage.getItem(key); } catch { return memoryFallback; } },
+  set(key, val) { try { localStorage.setItem(key, val); } catch { memoryFallback = val; } }
+};
+
+let records = [];          // raw entered rows
+let editingId = null;      // id of row being edited, or null
+
+async function loadRecords() {
+  const { data, error } = await sb.from("posts").select("*").order("date", { ascending: false });
+  if (error) { console.error(error); toast("Failed to load data — check console"); records = []; return; }
+  records = data || [];
+}
+// Kept for compatibility with code that still calls saveRecords() after local edits;
+// actual writes now happen directly in submitEntry/deleteEntry/loadSample via Supabase.
+function saveRecords() {}
+
+/* ---------- 3. Derived metrics & filtering ---------- */
+// Per-post calculated metrics. All divisions guard against zero.
+function derive(r) {
+  const engagement = r.likes + r.comments + r.shares + r.saves;
+  const net        = r.followersGained - r.followersLost;
+  return {
+    engagement,
+    net,
+    engRate:    r.reach       > 0 ? engagement / r.reach * 100        : 0,
+    ctr:        r.impressions > 0 ? r.clicks / r.impressions * 100    : 0,
+    convRate:   r.clicks      > 0 ? r.conversions / r.clicks * 100    : 0,
+    cpm:        r.impressions > 0 ? r.spend / r.impressions * 1000    : 0,
+    cpc:        r.clicks      > 0 ? r.spend / r.clicks                : 0,
+    cpa:        r.conversions > 0 ? r.spend / r.conversions           : 0,
+    roas:       r.spend       > 0 ? r.revenue / r.spend               : 0,
+    roi:        r.spend       > 0 ? (r.revenue - r.spend) / r.spend * 100 : 0,
+    costPerEng: engagement    > 0 ? r.spend / engagement              : 0
+  };
+}
+
+// Aggregate a set of rows into portfolio-level totals & rates.
+function aggregate(rows) {
+  const t = {
+    posts: rows.length, reach: 0, impressions: 0, likes: 0, comments: 0, shares: 0,
+    saves: 0, videoViews: 0, watchSum: 0, watchPosts: 0, profileVisits: 0, clicks: 0,
+    gained: 0, lost: 0, conversions: 0, spend: 0, revenue: 0
+  };
+  for (const r of rows) {
+    t.reach += r.reach; t.impressions += r.impressions; t.likes += r.likes;
+    t.comments += r.comments; t.shares += r.shares; t.saves += r.saves;
+    t.videoViews += r.videoViews; t.profileVisits += r.profileVisits; t.clicks += r.clicks;
+    t.gained += r.followersGained; t.lost += r.followersLost;
+    t.conversions += r.conversions; t.spend += r.spend; t.revenue += r.revenue;
+    if (r.videoViews > 0) { t.watchSum += r.watchTime; t.watchPosts++; }
+  }
+  t.engagement   = t.likes + t.comments + t.shares + t.saves;
+  t.net          = t.gained - t.lost;
+  t.engRate      = t.reach       > 0 ? t.engagement / t.reach * 100     : 0; // reach-weighted
+  t.ctr          = t.impressions > 0 ? t.clicks / t.impressions * 100   : 0;
+  t.convRate     = t.clicks      > 0 ? t.conversions / t.clicks * 100   : 0;
+  t.avgWatch     = t.watchPosts  > 0 ? t.watchSum / t.watchPosts        : 0;
+  t.avgEng       = t.posts       > 0 ? t.engagement / t.posts           : 0;
+  t.avgReach     = t.posts       > 0 ? t.reach / t.posts                : 0;
+  t.avgImpr      = t.posts       > 0 ? t.impressions / t.posts          : 0;
+  t.revPerPost   = t.posts       > 0 ? t.revenue / t.posts              : 0;
+  t.cpm          = t.impressions > 0 ? t.spend / t.impressions * 1000   : 0;
+  t.cpc          = t.clicks      > 0 ? t.spend / t.clicks               : 0;
+  t.cpa          = t.conversions > 0 ? t.spend / t.conversions          : 0;
+  t.costPerEng   = t.engagement  > 0 ? t.spend / t.engagement           : 0;
+  t.roas         = t.spend       > 0 ? t.revenue / t.spend              : 0;
+  t.roi          = t.spend       > 0 ? (t.revenue - t.spend) / t.spend * 100 : 0;
+  return t;
+}
+
+// Group rows by a key and aggregate each group. Returns [{key, rows, agg}]
+function groupBy(rows, keyFn) {
+  const map = new Map();
+  for (const r of rows) {
+    const k = keyFn(r) || "—";
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(r);
+  }
+  return [...map.entries()].map(([key, groupRows]) => ({ key, rows: groupRows, agg: aggregate(groupRows) }));
+}
+
+// Read current filter controls and return matching rows (sorted by date).
+function getFiltered() {
+  const platform = $("#fPlatform").value, campaign = $("#fCampaign").value,
+        pillar   = $("#fPillar").value,   type     = $("#fType").value,
+        month    = $("#fMonth").value,    quarter  = $("#fQuarter").value,
+        year     = $("#fYear").value,     from     = $("#fFrom").value,
+        to       = $("#fTo").value,
+        q        = $("#searchInput").value.trim().toLowerCase();
+
+  return records.filter(r => {
+    if (platform && r.platform !== platform) return false;
+    if (campaign && r.campaign !== campaign) return false;
+    if (pillar   && r.pillar   !== pillar)   return false;
+    if (type     && r.postType !== type)     return false;
+    if (month    && monthKeyOf(r.date) !== month) return false;
+    if (quarter  && String(quarterOf(r.date)) !== quarter) return false;
+    if (year     && r.date.slice(0, 4) !== year) return false;
+    if (from     && r.date < from) return false;
+    if (to       && r.date > to)   return false;
+    if (q) {
+      const hay = `${r.campaign} ${r.platform} ${r.title} ${r.pillar} ${r.postType} ${r.notes}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// Rebuild the <option> lists for filters + datalists from the data itself.
+function populateFilterOptions() {
+  const uniq = fn => [...new Set(records.map(fn).filter(Boolean))].sort();
+  const fill = (sel, values, labelFn = v => v) => {
+    const el = $(sel), current = el.value;
+    el.length = 1; // keep the "All …" option
+    for (const v of values) el.add(new Option(labelFn(v), v));
+    if ([...el.options].some(o => o.value === current)) el.value = current;
+  };
+  fill("#fPlatform", uniq(r => r.platform));
+  fill("#fCampaign", uniq(r => r.campaign));
+  fill("#fPillar",   uniq(r => r.pillar));
+  fill("#fType",     uniq(r => r.postType));
+  fill("#fMonth",    [...new Set(records.map(r => monthKeyOf(r.date)))].sort(), monthLabel);
+  fill("#fYear",     [...new Set(records.map(r => r.date.slice(0, 4)))].sort());
+  const dl = (id, values) => { $(id).innerHTML = values.map(v => `<option value="${esc(v)}">`).join(""); };
+  dl("#dlCampaigns", uniq(r => r.campaign));
+  dl("#dlPillars",   uniq(r => r.pillar));
+}
+
+/* ---------- 4. Rendering: KPIs & table ---------- */
+const ICONS = {
+  posts:   '<path d="M4 5h16M4 12h16M4 19h10"/>',
+  reach:   '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
+  eye:     '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.5"/>',
+  spark:   '<polyline points="3 14 7 14 10 5 14 19 17 11 21 11"/>',
+  pct:     '<path d="m5 19 14-14"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  up:      '<path d="M12 19V5m0 0-6 6m6-6 6 6"/>',
+  down:    '<path d="M12 5v14m0 0 6-6m-6 6-6-6"/>',
+  users:   '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"/><path d="M16 8.5a3 3 0 1 1 2 5.3M17 15c2.6.4 4 2.2 4 5"/>',
+  person:  '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/>',
+  click:   '<path d="m9 9 10 4-4.5 1.5L13 19 9 9Z"/><path d="M5 5l1.5 1.5M12 3v2M3 12h2"/>',
+  play:    '<circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5v-7Z"/>',
+  clock:   '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  share:   '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/>',
+  comment: '<path d="M21 12a8 8 0 0 1-8 8H4l2-3.5A8 8 0 1 1 21 12Z"/>',
+  heart:   '<path d="M12 20s-7.5-4.5-9-9a4.7 4.7 0 0 1 9-2 4.7 4.7 0 0 1 9 2c-1.5 4.5-9 9-9 9Z"/>',
+  save:    '<path d="M6 3h12v18l-6-4-6 4V3Z"/>',
+  target:  '<circle cx="12" cy="12" r="9"/><path d="m12 12 5-5M15 4l2 3 3 .5"/>',
+  trophy:  '<path d="M8 21h8m-4-4v4M5 4h14v4a7 7 0 0 1-14 0V4Z"/>',
+  flag:    '<path d="M5 21V4m0 0h12l-2.5 3.5L17 11H5"/>'
+};
+const kicon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
+
+function renderKPIs(rows, t) {
+  const grid = $("#kpiGrid"), empty = $("#overviewEmpty");
+  const hasAny = records.length > 0;
+  empty.style.display = hasAny ? "none" : "";
+  grid.style.display  = hasAny ? "" : "none";
+  $("#overviewSub").textContent = hasAny
+    ? `${fmtInt(rows.length)} of ${fmtInt(records.length)} posts in the current view.`
+    : "Key performance across every platform, campaign, and post.";
+  if (!hasAny) return;
+
+  // Top performers for the two text KPI cards
+  const byPlat = groupBy(rows, r => r.platform).sort((a, b) => b.agg.engagement - a.agg.engagement)[0];
+  const byCamp = groupBy(rows.filter(r => r.campaign), r => r.campaign).sort((a, b) => b.agg.engagement - a.agg.engagement)[0];
+
+  const cards = [
+    { l: "Total posts",        v: fmtInt(t.posts),        i: "posts",  s: "in current view", tip: "Number of posts matching the active filters" },
+    { l: "Total reach",        v: fmtN(t.reach),          i: "reach",  s: `avg ${fmtN(t.avgReach)} / post`, tip: "Sum of unique people reached" },
+    { l: "Total impressions",  v: fmtN(t.impressions),    i: "eye",    s: `avg ${fmtN(t.avgImpr)} / post`, tip: "Sum of times posts were displayed" },
+    { l: "Total engagement",   v: fmtN(t.engagement),     i: "spark",  s: `avg ${fmtN(t.avgEng)} / post`, tip: "Likes + comments + shares + saves" },
+    { l: "Avg engagement rate",v: fmtPct(t.engRate),      i: "pct",    s: "engagement ÷ reach", tip: "Total engagement divided by total reach" },
+    { l: "Followers gained",   v: fmtN(t.gained),         i: "up",     cls: "kpi-good", tip: "New followers attributed to these posts" },
+    { l: "Followers lost",     v: fmtN(t.lost),           i: "down",   cls: t.lost > 0 ? "kpi-bad" : "", tip: "Unfollows during these posts" },
+    { l: "Net followers",      v: (t.net >= 0 ? "+" : "") + fmtN(t.net), i: "users", cls: t.net >= 0 ? "kpi-good" : "kpi-bad", tip: "Followers gained minus lost" },
+    { l: "Profile visits",     v: fmtN(t.profileVisits),  i: "person", tip: "Visits to your profile from these posts" },
+    { l: "Website clicks",     v: fmtN(t.clicks),         i: "click",  s: `CPC ${t.cpc ? fmtCur(t.cpc) : "—"}`, tip: "Link clicks. CPC = spend ÷ clicks" },
+    { l: "Video views",        v: fmtN(t.videoViews),     i: "play",   tip: "Total video views" },
+    { l: "Avg watch time",     v: fmtDur(t.avgWatch),     i: "clock",  s: "video posts only", tip: "Average watch time across posts with video views" },
+    { l: "Shares",             v: fmtN(t.shares),         i: "share",  tip: "Total shares / reposts" },
+    { l: "Comments",           v: fmtN(t.comments),       i: "comment",tip: "Total comments" },
+    { l: "Likes",              v: fmtN(t.likes),          i: "heart",  tip: "Total likes / reactions" },
+    { l: "Saves",              v: fmtN(t.saves),          i: "save",   tip: "Total saves / bookmarks" },
+    { l: "CTR",                v: fmtPct(t.ctr),          i: "target", s: "clicks ÷ impressions", tip: "Website clicks divided by impressions" },
+    { l: "Conversion rate",    v: fmtPct(t.convRate),     i: "target", s: `${fmtInt(t.conversions)} conversions · CPA ${t.cpa ? fmtCur(t.cpa) : "—"}`, tip: "Conversions ÷ website clicks. CPA = spend ÷ conversions" },
+    { l: "Top platform",       v: byPlat ? esc(byPlat.key) : "—", i: "trophy", cls: "kpi-text", s: byPlat ? fmtN(byPlat.agg.engagement) + " engagement" : "", tip: "Platform with the most engagement in view" },
+    { l: "Top campaign",       v: byCamp ? esc(byCamp.key) : "—", i: "flag",   cls: "kpi-text", s: byCamp ? fmtN(byCamp.agg.engagement) + " engagement" : "", tip: "Campaign with the most engagement in view" }
+  ];
+  grid.innerHTML = cards.map((c, i) => `
+    <div class="kpi ${c.cls || ""}" title="${esc(c.tip)}" style="animation-delay:${Math.min(i * 25, 400)}ms">
+      <div class="kpi-label">${kicon(c.i)}${esc(c.l)}</div>
+      <div class="kpi-value num">${c.v}</div>
+      ${c.s ? `<div class="kpi-sub">${c.s}</div>` : ""}
+    </div>`).join("");
+}
+
+function renderTable(rows) {
+  const body = $("#tableBody");
+  $("#rowCount").textContent = fmtInt(rows.length);
+  const hasAny = records.length > 0;
+  $("#tableEmpty").style.display = hasAny ? "none" : "";
+  $("#tableWrap").style.display  = hasAny ? "" : "none";
+  if (!hasAny) { body.innerHTML = ""; return; }
+  if (!rows.length) {
+    body.innerHTML = `<tr><td colspan="26" style="text-align:center;color:var(--muted);padding:28px">No posts match the current filters or search.</td></tr>`;
+    return;
+  }
+  body.innerHTML = [...rows].reverse().map(r => {
+    const d = derive(r);
+    return `<tr data-id="${r.id}">
+      <td class="num">${r.date}</td>
+      <td><span class="pill"><span class="dot" style="background:${platColor(r.platform)}"></span>${esc(r.platform)}</span></td>
+      <td>${esc(r.campaign) || "—"}</td>
+      <td>${esc(r.pillar) || "—"}</td>
+      <td>${esc(r.postType)}</td>
+      <td class="title-cell" title="${esc(r.title)}">${esc(r.title) || "—"}</td>
+      <td class="num">${fmtInt(r.reach)}</td>
+      <td class="num">${fmtInt(r.impressions)}</td>
+      <td class="num">${fmtInt(r.likes)}</td>
+      <td class="num">${fmtInt(r.comments)}</td>
+      <td class="num">${fmtInt(r.shares)}</td>
+      <td class="num">${fmtInt(r.saves)}</td>
+      <td class="num"><strong>${fmtInt(d.engagement)}</strong></td>
+      <td class="num">${fmtPct(d.engRate)}</td>
+      <td class="num">${fmtInt(r.videoViews)}</td>
+      <td class="num">${fmtDur(r.watchTime)}</td>
+      <td class="num">${fmtInt(r.profileVisits)}</td>
+      <td class="num">${fmtInt(r.clicks)}</td>
+      <td class="num">${fmtPct(d.ctr)}</td>
+      <td class="num" style="color:${d.net >= 0 ? "var(--good)" : "var(--bad)"}">${d.net >= 0 ? "+" : ""}${fmtInt(d.net)}</td>
+      <td class="num">${fmtInt(r.conversions)}</td>
+      <td class="num">${fmtCur(r.spend)}</td>
+      <td class="num">${fmtCur(r.revenue)}</td>
+      <td class="num">${r.spend > 0 ? fmtX(d.roas) : "—"}</td>
+      <td class="title-cell" title="${esc(r.notes)}">${esc(r.notes) || "—"}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-ghost btn-sm" data-edit="${r.id}" title="Edit this post">Edit</button>
+        <button class="btn btn-ghost btn-sm btn-danger" data-del="${r.id}" title="Delete this post">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+}
+/* ---------- 5. Charts (dependency-free SVG + CSS bars) ---------- */
+
+// Shared month axis for the whole filtered view, so trend charts align.
+function monthSeries(rows, valueFn) {
+  const keys = [...new Set(rows.map(r => monthKeyOf(r.date)))].sort();
+  return keys.map(k => {
+    const monthRows = rows.filter(r => monthKeyOf(r.date) === k);
+    return { label: monthLabel(k), value: valueFn(monthRows, aggregate(monthRows)) };
+  });
+}
+
+// Line chart with area fill, dots and hoverable value titles.
+function lineChart(el, points, { fmt = fmtN, color = "var(--accent)" } = {}) {
+  if (!points.length) { el.innerHTML = `<p style="color:var(--muted);font-size:13px">No data in view.</p>`; return; }
+  const W = 620, H = 230, padL = 46, padR = 14, padT = 14, padB = 30;
+  const max = Math.max(...points.map(p => p.value), 1);
+  const min = Math.min(...points.map(p => p.value), 0);
+  const span = (max - min) || 1;
+  const x = i => points.length === 1
+    ? (padL + (W - padL - padR) / 2)
+    : padL + i * (W - padL - padR) / (points.length - 1);
+  const y = v => padT + (H - padT - padB) * (1 - (v - min) / span);
+  const path = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const area = `${path} L${x(points.length - 1).toFixed(1)},${H - padB} L${x(0).toFixed(1)},${H - padB} Z`;
+  // 4 horizontal gridlines with value labels
+  let grid = "";
+  for (let g = 0; g <= 3; g++) {
+    const gv = min + span * g / 3, gy = y(gv).toFixed(1);
+    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--line)" stroke-width="1"/>
+             <text x="${padL - 7}" y="${+gy + 4}" text-anchor="end" font-size="10.5" fill="var(--muted)">${fmt(gv)}</text>`;
+  }
+  const step = Math.ceil(points.length / 8); // avoid crowded x labels
+  const labels = points.map((p, i) => i % step ? "" :
+    `<text x="${x(i).toFixed(1)}" y="${H - 9}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${esc(p.label)}</text>`).join("");
+  const dots = points.map((p, i) =>
+    `<circle cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="4" fill="${color}" stroke="var(--surface)" stroke-width="1.5">
+       <title>${esc(p.label)}: ${fmt(p.value)}</title></circle>`).join("");
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Line chart">
+    ${grid}<path d="${area}" fill="${color}" opacity="0.10"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${labels}</svg>`;
+}
+
+// Vertical bar chart (monthly quantities).
+function barChartV(el, points, { fmt = fmtN, color = "var(--accent)" } = {}) {
+  if (!points.length) { el.innerHTML = `<p style="color:var(--muted);font-size:13px">No data in view.</p>`; return; }
+  const W = 620, H = 230, padL = 46, padR = 14, padT = 14, padB = 30;
+  const max = Math.max(...points.map(p => p.value), 1);
+  const slot = (W - padL - padR) / points.length;
+  const bw = Math.min(slot * 0.62, 46);
+  let grid = "";
+  for (let g = 0; g <= 3; g++) {
+    const gv = max * g / 3, gy = (padT + (H - padT - padB) * (1 - g / 3)).toFixed(1);
+    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--line)"/>
+             <text x="${padL - 7}" y="${+gy + 4}" text-anchor="end" font-size="10.5" fill="var(--muted)">${fmt(gv)}</text>`;
+  }
+  const step = Math.ceil(points.length / 8);
+  const bars = points.map((p, i) => {
+    const bx = padL + i * slot + (slot - bw) / 2;
+    const bh = (H - padT - padB) * (p.value / max);
+    const lab = i % step ? "" : `<text x="${(padL + i * slot + slot / 2).toFixed(1)}" y="${H - 9}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${esc(p.label)}</text>`;
+    return `<rect x="${bx.toFixed(1)}" y="${(H - padB - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(bh, 1).toFixed(1)}" rx="5" fill="${color}">
+              <title>${esc(p.label)}: ${fmt(p.value)}</title></rect>${lab}`;
+  }).join("");
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Bar chart">${grid}${bars}</svg>`;
+}
+
+// Horizontal bars for categorical comparisons (platform, campaign, top posts).
+function barChartH(el, items, { fmt = fmtN, colorFn = null, max = null } = {}) {
+  if (!items.length) { el.innerHTML = `<p style="color:var(--muted);font-size:13px">No data in view.</p>`; return; }
+  const top = max ?? Math.max(...items.map(i => i.value), 1);
+  el.innerHTML = items.map(i => `
+    <div class="hbar-row" title="${esc(i.label)}: ${fmt(i.value)}">
+      <span class="hbar-label">${colorFn ? `<span class="dot" style="background:${colorFn(i)}"></span>` : ""}${esc(i.label)}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${(i.value / top * 100).toFixed(1)}%;${colorFn ? `background:${colorFn(i)}` : ""}"></div></div>
+      <span class="hbar-val num">${fmt(i.value)}</span>
+    </div>`).join("");
+}
+
+function renderCharts(rows) {
+  const hasAny = records.length > 0;
+  $("#chartsEmpty").style.display = hasAny ? "none" : "";
+  $("#chartsWrap").style.display  = hasAny ? "" : "none";
+  if (!hasAny) return;
+
+  lineChart($("#chEngagement"), monthSeries(rows, (_, a) => a.engagement));
+  lineChart($("#chReach"),      monthSeries(rows, (_, a) => a.reach), { color: "#4A7DBF" });
+
+  // Follower growth: cumulative net across months
+  let running = 0;
+  const growth = monthSeries(rows, (_, a) => a.net).map(p => ({ label: p.label, value: (running += p.value) }));
+  lineChart($("#chFollowers"), growth, { fmt: v => (v >= 0 ? "+" : "") + fmtN(v), color: "#7C6BC9" });
+
+  barChartV($("#chFrequency"), monthSeries(rows, m => m.length), { fmt: fmtInt, color: "#8FA3B8" });
+  barChartV($("#chRevenue"),   monthSeries(rows, (_, a) => a.revenue), { fmt: fmtCur, color: "#3D8B62" });
+
+  const platItems = groupBy(rows, r => r.platform)
+    .map(g => ({ label: g.key, value: g.agg.engagement }))
+    .sort((a, b) => b.value - a.value);
+  barChartH($("#chPlatform"), platItems, { colorFn: i => platColor(i.label) });
+
+  const campItems = groupBy(rows.filter(r => r.campaign), r => r.campaign)
+    .map(g => ({ label: g.key, value: g.agg.engagement }))
+    .sort((a, b) => b.value - a.value).slice(0, 8);
+  barChartH($("#chCampaign"), campItems);
+
+  const roasItems = groupBy(rows.filter(r => r.campaign && r.spend > 0), r => r.campaign)
+    .map(g => ({ label: g.key, value: g.agg.roas }))
+    .sort((a, b) => b.value - a.value).slice(0, 8);
+  barChartH($("#chRoas"), roasItems, { fmt: fmtX });
+
+  const topItems = [...rows].map(r => ({ label: r.title || `${r.platform} · ${r.date}`, value: derive(r).engagement, plat: r.platform }))
+    .sort((a, b) => b.value - a.value).slice(0, 8);
+  barChartH($("#chTop"), topItems, { colorFn: i => platColor(i.plat) });
+}
+
+/* ---------- 6a. Leaderboards ---------- */
+function renderBoards(rows) {
+  const hasAny = records.length > 0;
+  $("#boardsEmpty").style.display = hasAny ? "none" : "";
+  const grid = $("#boardsGrid");
+  grid.style.display = hasAny ? "" : "none";
+  if (!hasAny) { grid.innerHTML = ""; return; }
+
+  const postName = r => esc(r.title || `${r.platform} post`);
+  const board = (title, sub, entries) => `
+    <div class="card board"><h3>${title}</h3><div class="card-sub">${sub}</div>
+      ${entries.length ? `<ol>${entries.map(e => `
+        <li><span class="b-name">${e.name}<span class="b-meta">${e.meta || ""}</span></span><span class="b-val num">${e.val}</span></li>`).join("")}</ol>`
+        : `<p style="padding:6px 20px 16px;color:var(--muted);font-size:13px">Not enough data yet.</p>`}
+    </div>`;
+
+  const withD = rows.map(r => ({ r, d: derive(r) }));
+  const camps = groupBy(rows.filter(r => r.campaign), r => r.campaign);
+  const plats = groupBy(rows, r => r.platform);
+
+  grid.innerHTML = [
+    board("Top 10 posts", "Ranked by total engagement",
+      [...withD].sort((a, b) => b.d.engagement - a.d.engagement).slice(0, 10)
+        .map(({ r, d }) => ({ name: postName(r), meta: `${esc(r.platform)} · ${r.date}`, val: fmtN(d.engagement) }))),
+    board("Top campaigns", "Ranked by total engagement",
+      [...camps].sort((a, b) => b.agg.engagement - a.agg.engagement).slice(0, 10)
+        .map(g => ({ name: esc(g.key), meta: `${g.agg.posts} posts`, val: fmtN(g.agg.engagement) }))),
+    board("Top platforms", "Ranked by total engagement",
+      [...plats].sort((a, b) => b.agg.engagement - a.agg.engagement)
+        .map(g => ({ name: esc(g.key), meta: `${g.agg.posts} posts · ${fmtPct(g.agg.engRate)} eng. rate`, val: fmtN(g.agg.engagement) }))),
+    board("Best engagement rate", "Posts with at least 100 reach",
+      [...withD].filter(({ r }) => r.reach >= 100).sort((a, b) => b.d.engRate - a.d.engRate).slice(0, 10)
+        .map(({ r, d }) => ({ name: postName(r), meta: `${esc(r.platform)} · ${fmtN(r.reach)} reach`, val: fmtPct(d.engRate) }))),
+    board("Highest reach", "Single posts by reach",
+      [...withD].sort((a, b) => b.r.reach - a.r.reach).slice(0, 10)
+        .map(({ r }) => ({ name: postName(r), meta: `${esc(r.platform)} · ${r.date}`, val: fmtN(r.reach) }))),
+    board("Highest revenue", "Campaigns by attributed revenue",
+      [...camps].filter(g => g.agg.revenue > 0).sort((a, b) => b.agg.revenue - a.agg.revenue).slice(0, 10)
+        .map(g => ({ name: esc(g.key), meta: `${fmtX(g.agg.roas)} ROAS`, val: fmtCur(g.agg.revenue) }))),
+    board("Highest ROI", "Campaigns with ad spend, by return on investment",
+      [...camps].filter(g => g.agg.spend > 0).sort((a, b) => b.agg.roi - a.agg.roi).slice(0, 10)
+        .map(g => ({ name: esc(g.key), meta: `${fmtCur(g.agg.spend)} spend → ${fmtCur(g.agg.revenue)}`, val: fmtPct(g.agg.roi) })))
+  ].join("");
+}
+
+/* ---------- 6b. Insights ---------- */
+function renderInsights(rows) {
+  const hasAny = records.length > 0;
+  $("#insightsEmpty").style.display = hasAny ? "none" : "";
+  const list = $("#insightsList");
+  list.style.display = hasAny ? "" : "none";
+  if (!hasAny) { list.innerHTML = ""; return; }
+
+  const insights = [];
+  const t = aggregate(rows);
+  const pct = v => Math.abs(Math.round(v)) + "%";
+
+  // 1. Post-type winner vs the rest (needs 2+ types with enough reach)
+  const types = groupBy(rows, r => r.postType).filter(g => g.agg.reach >= 200);
+  if (types.length >= 2) {
+    const sorted = [...types].sort((a, b) => b.agg.engRate - a.agg.engRate);
+    const best = sorted[0], rest = aggregate(rows.filter(r => r.postType !== best.key));
+    if (rest.engRate > 0 && best.agg.engRate > rest.engRate * 1.1) {
+      insights.push({ tone: "", icon: "spark", h: `${best.key} posts out-perform everything else`,
+        p: `${best.key} posts average a ${fmtPct(best.agg.engRate)} engagement rate — ${pct((best.agg.engRate / rest.engRate - 1) * 100)} higher than your other formats. Consider shifting more of the calendar toward this format.` });
+    }
+  }
+  // 2. ROAS champion
+  const spendCamps = groupBy(rows.filter(r => r.campaign && r.spend > 0), r => r.campaign);
+  if (spendCamps.length) {
+    const best = [...spendCamps].sort((a, b) => b.agg.roas - a.agg.roas)[0];
+    insights.push({ tone: best.agg.roas >= 1 ? "" : "neg", icon: "trophy",
+      h: `${best.key} delivers your best return on ad spend`,
+      p: `Every $1 spent on ${best.key} returned $${(Math.round(best.agg.roas * 100) / 100)} in revenue (${fmtX(best.agg.roas)} ROAS on ${fmtCur(best.agg.spend)} spend).${best.agg.roas < 1 ? " It is still below break-even — review targeting or creative before scaling." : ""}` });
+  }
+  // 3. Posting frequency trend (last full month vs previous)
+  const months = [...new Set(rows.map(r => monthKeyOf(r.date)))].sort();
+  if (months.length >= 2) {
+    const last = months[months.length - 1], prev = months[months.length - 2];
+    const lastN = rows.filter(r => monthKeyOf(r.date) === last).length;
+    const prevN = rows.filter(r => monthKeyOf(r.date) === prev).length;
+    if (prevN > 0 && Math.abs(lastN - prevN) / prevN >= 0.2) {
+      const down = lastN < prevN;
+      insights.push({ tone: down ? "warn" : "", icon: "posts",
+        h: `Posting frequency ${down ? "dropped" : "rose"} ${pct((lastN / prevN - 1) * 100)} in ${monthLabel(last)}`,
+        p: `You published ${lastN} posts in ${monthLabel(last)} versus ${prevN} in ${monthLabel(prev)}. ${down ? "Consistency usually compounds reach — consider batching content to protect the cadence." : "Keep an eye on quality metrics to make sure the extra volume is holding up."}` });
+    }
+  }
+  // 4. Best platform by engagement rate
+  const plats = groupBy(rows, r => r.platform).filter(g => g.agg.reach >= 200);
+  if (plats.length >= 2) {
+    const best = [...plats].sort((a, b) => b.agg.engRate - a.agg.engRate)[0];
+    insights.push({ tone: "", icon: "reach", h: `${best.key} is your most engaged audience`,
+      p: `${best.key} converts ${fmtPct(best.agg.engRate)} of reached users into engagement — the strongest of your ${plats.length} active platforms. Its audience may deserve first look at new content.` });
+  }
+  // 5. Best day of week
+  if (rows.length >= 8) {
+    const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const byDay = groupBy(rows, r => DAYS[new Date(r.date + "T12:00:00").getDay()]).filter(g => g.rows.length >= 2);
+    if (byDay.length >= 2) {
+      const best = [...byDay].sort((a, b) => b.agg.avgEng - a.agg.avgEng)[0];
+      const others = aggregate(rows.filter(r => DAYS[new Date(r.date + "T12:00:00").getDay()] !== best.key));
+      if (others.avgEng > 0 && best.agg.avgEng > others.avgEng * 1.15) {
+        insights.push({ tone: "", icon: "clock", h: `${best.key} posts earn the most engagement`,
+          p: `Posts published on ${best.key}s average ${fmtN(best.agg.avgEng)} engagements — ${pct((best.agg.avgEng / others.avgEng - 1) * 100)} above other days. Worth scheduling hero content there.` });
+      }
+    }
+  }
+  // 6. Revenue concentration
+  const revCamps = groupBy(rows.filter(r => r.campaign && r.revenue > 0), r => r.campaign);
+  if (revCamps.length >= 2 && t.revenue > 0) {
+    const best = [...revCamps].sort((a, b) => b.agg.revenue - a.agg.revenue)[0];
+    const share = best.agg.revenue / t.revenue * 100;
+    if (share >= 40) {
+      insights.push({ tone: share >= 70 ? "warn" : "", icon: "flag",
+        h: `${best.key} drives ${pct(share)} of tracked revenue`,
+        p: `${fmtCur(best.agg.revenue)} of ${fmtCur(t.revenue)} total revenue comes from a single campaign.${share >= 70 ? " That concentration is a risk — test whether its winning angle transfers to other campaigns." : ""}` });
+    }
+  }
+  // 7. Net follower direction (last month)
+  if (months.length >= 2) {
+    const last = months[months.length - 1];
+    const lastAgg = aggregate(rows.filter(r => monthKeyOf(r.date) === last));
+    if (lastAgg.net < 0) {
+      insights.push({ tone: "neg", icon: "down", h: `Net followers went negative in ${monthLabel(last)}`,
+        p: `You lost ${fmtInt(lastAgg.lost)} followers against ${fmtInt(lastAgg.gained)} gained (net ${fmtInt(lastAgg.net)}). Check whether a content shift or posting gap coincided with the dip.` });
+    }
+  }
+  // 8. CTR leader
+  const ctrPlats = groupBy(rows, r => r.platform).filter(g => g.agg.impressions >= 500 && g.agg.clicks > 0);
+  if (ctrPlats.length >= 2) {
+    const best = [...ctrPlats].sort((a, b) => b.agg.ctr - a.agg.ctr)[0];
+    insights.push({ tone: "", icon: "click", h: `${best.key} sends the most efficient traffic`,
+      p: `At ${fmtPct(best.agg.ctr)} CTR, ${best.key} turns impressions into website clicks better than any other platform. Prioritise it for link-driven objectives.` });
+  }
+
+  list.innerHTML = insights.length
+    ? insights.map((ins, i) => `
+      <div class="insight ${ins.tone}" style="animation-delay:${i * 45}ms">
+        <div class="i-icon">${kicon(ins.icon)}</div>
+        <div><h4>${esc(ins.h)}</h4><p>${esc(ins.p)}</p></div>
+      </div>`).join("")
+    : `<div class="empty"><h3>Not enough signal yet</h3><p>Add more posts across different platforms, post types, and months, and insights will appear here automatically.</p></div>`;
+}
+/* ---------- 6c. Export ---------- */
+const CSV_FIELDS = [
+  ["date","Date"],["platform","Platform"],["campaign","Campaign"],["pillar","Content Pillar"],
+  ["postType","Post Type"],["title","Content Title"],["reach","Reach"],["impressions","Impressions"],
+  ["likes","Likes"],["comments","Comments"],["shares","Shares"],["saves","Saves"],
+  ["videoViews","Video Views"],["watchTime","Avg Watch Time (s)"],["profileVisits","Profile Visits"],
+  ["clicks","Website Clicks"],["followersGained","Followers Gained"],["followersLost","Followers Lost"],
+  ["conversions","Conversions"],["spend","Spend"],["revenue","Revenue"],["notes","Notes"]
+];
+const CSV_DERIVED = [
+  ["engagement","Engagement"],["engRate","Engagement Rate %"],["ctr","CTR %"],["convRate","Conversion Rate %"],
+  ["cpm","CPM"],["cpc","CPC"],["cpa","CPA"],["roas","ROAS"],["roi","ROI %"],
+  ["net","Net Followers"],["costPerEng","Cost per Engagement"]
+];
+
+function download(name, mime, content) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+const csvCell = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const stamp = () => new Date().toISOString().slice(0, 10);
+
+function exportCSV() {
+  const rows = getFiltered();
+  if (!rows.length) return toast("Nothing to export in the current view");
+  const head = [...CSV_FIELDS.map(f => f[1]), ...CSV_DERIVED.map(f => f[1])].join(",");
+  const lines = rows.map(r => {
+    const d = derive(r);
+    return [...CSV_FIELDS.map(([k]) => csvCell(r[k])),
+            ...CSV_DERIVED.map(([k]) => csvCell(Math.round(d[k] * 10000) / 10000))].join(",");
+  });
+  download(`pulse-analytics-${stamp()}.csv`, "text/csv;charset=utf-8", "\uFEFF" + [head, ...lines].join("\n"));
+  toast(`Exported ${rows.length} rows to CSV`);
+}
+function exportJSON() {
+  const rows = getFiltered();
+  if (!rows.length) return toast("Nothing to export in the current view");
+  const payload = rows.map(r => ({ ...r, calculated: derive(r) }));
+  download(`pulse-analytics-${stamp()}.json`, "application/json", JSON.stringify(payload, null, 2));
+  toast(`Exported ${rows.length} rows to JSON`);
+}
+function printReport() {
+  $("#printMeta").textContent = `Generated ${new Date().toLocaleString()} · ${getFiltered().length} posts in view`;
+  window.print();
+}
+
+/* ---------- 7. Entry form (add / edit / delete) ---------- */
+const FORM_MAP = [
+  ["eDate","date"],["ePlatform","platform"],["eCampaign","campaign"],["ePillar","pillar"],
+  ["eType","postType"],["eTitle","title"],["eReach","reach"],["eImpressions","impressions"],
+  ["eLikes","likes"],["eComments","comments"],["eShares","shares"],["eSaves","saves"],
+  ["eVideoViews","videoViews"],["eWatchTime","watchTime"],["eProfileVisits","profileVisits"],
+  ["eClicks","clicks"],["eFollowersGained","followersGained"],["eFollowersLost","followersLost"],
+  ["eConversions","conversions"],["eSpend","spend"],["eRevenue","revenue"],["eNotes","notes"]
+];
+const NUMERIC = new Set(["reach","impressions","likes","comments","shares","saves","videoViews","watchTime",
+  "profileVisits","clicks","followersGained","followersLost","conversions","spend","revenue"]);
+
+function openModal(id = null) {
+  editingId = id;
+  const r = id ? records.find(x => x.id === id) : null;
+  $("#modalTitle").textContent = r ? "Edit post data" : "Add post data";
+  $("#btnSaveEntry").textContent = r ? "Save changes" : "Save post";
+  const KEEP_LAST = new Set(["platform", "postType"]); // remember last-used selects
+  for (const [fid, key] of FORM_MAP) {
+    const el = $("#" + fid);
+    el.value = r ? r[key] : (KEEP_LAST.has(key) ? el.value : "");
+  }
+  if (!r) $("#eDate").value = new Date().toISOString().slice(0, 10);
+  $("#entryModal").classList.add("open");
+  $("#eDate").focus();
+}
+function closeModal() { $("#entryModal").classList.remove("open"); editingId = null; }
+
+async function submitEntry() {
+  if (!$("#eDate").value) { toast("Please choose a date"); $("#eDate").focus(); return; }
+  const entry = { id: editingId || uid() };
+  for (const [fid, key] of FORM_MAP) {
+    const raw = $("#" + fid).value;
+    entry[key] = NUMERIC.has(key) ? Math.max(0, parseFloat(raw) || 0) : raw.trim();
+  }
+  if (editingId) {
+    const { error } = await sb.from("posts").update(entry).eq("id", editingId);
+    if (error) { console.error(error); toast("Failed to update — check console"); return; }
+    toast("Post updated");
+  } else {
+    const { error } = await sb.from("posts").insert(entry);
+    if (error) { console.error(error); toast("Failed to save — check console"); return; }
+    toast("Post saved");
+  }
+  closeModal();
+  await loadRecords(); refresh();
+}
+async function deleteEntry(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm(`Delete "${r.title || r.platform + " post"}" from ${r.date}? This can't be undone.`)) return;
+  const { error } = await sb.from("posts").delete().eq("id", id);
+  if (error) { console.error(error); toast("Failed to delete — check console"); return; }
+  await loadRecords(); refresh(); toast("Post deleted");
+}
+
+/* ---------- 8. Sample data ---------- */
+async function loadSample() {
+  // Deterministic pseudo-random so the sample always looks the same.
+  let seed = 42;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const ri = (min, max) => Math.floor(min + rnd() * (max - min + 1));
+
+  const platforms = ["Instagram","TikTok","LinkedIn","YouTube","Facebook","X (Twitter)"];
+  const campaigns = ["Spring Launch","Evergreen Content","Summer Sale","Webinar Series","Brand Awareness"];
+  const pillars   = ["Education","Behind the scenes","Product","Community","Thought leadership"];
+  const typesByPlat = {
+    "Instagram": ["Reel / Short","Carousel","Image","Story"], "TikTok": ["Reel / Short"],
+    "LinkedIn": ["Text","Image","Carousel","Video"], "YouTube": ["Video","Reel / Short"],
+    "Facebook": ["Image","Video","Text"], "X (Twitter)": ["Text","Image"]
+  };
+  const titles = ["5 mistakes to avoid","Behind the launch","Customer story: Maya","How we plan a quarter",
+    "Quick tip Tuesday","Product demo in 60s","Team AMA highlights","The data says this works",
+    "Before & after","What we shipped this week","Founder Q&A","Myth vs reality","Checklist you can steal",
+    "Live recap","Our biggest lesson"];
+
+  const platBoost = { "Instagram": 1.25, "TikTok": 1.6, "LinkedIn": 0.8, "YouTube": 1.0, "Facebook": 0.7, "X (Twitter)": 0.6 };
+  const typeBoost = { "Reel / Short": 1.5, "Video": 1.2, "Carousel": 1.15, "Image": 1.0, "Story": 0.7, "Text": 0.85, "Live": 1.1 };
+
+  const sample = [];
+  const now = new Date();
+  for (let m = 5; m >= 0; m--) {
+    const base = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    const postsThisMonth = m === 1 ? ri(6, 8) : ri(10, 15); // dip last-but-one month → frequency insight
+    for (let p = 0; p < postsThisMonth; p++) {
+      const platform = platforms[ri(0, platforms.length - 1)];
+      const postType = typesByPlat[platform][ri(0, typesByPlat[platform].length - 1)];
+      const campaign = campaigns[ri(0, campaigns.length - 1)];
+      const day = ri(1, 28);
+      const date = new Date(base.getFullYear(), base.getMonth(), day);
+      const boost = platBoost[platform] * (typeBoost[postType] || 1);
+      const reach = Math.round(ri(1500, 22000) * boost);
+      const impressions = Math.round(reach * (1.15 + rnd() * 0.5));
+      const engBase = reach * (0.02 + rnd() * 0.05) * boost;
+      const likes = Math.round(engBase * 0.72), comments = Math.round(engBase * 0.08);
+      const shares = Math.round(engBase * 0.1), saves = Math.round(engBase * 0.1);
+      const isVideo = ["Reel / Short","Video","Live"].includes(postType);
+      const clicks = Math.round(impressions * (0.004 + rnd() * 0.012));
+      const paid = campaign === "Summer Sale" || (campaign === "Spring Launch" && rnd() > 0.4);
+      const spend = paid ? ri(40, 320) : 0;
+      const conversions = clicks > 0 ? Math.round(clicks * (0.02 + rnd() * 0.06)) : 0;
+      const revenue = conversions > 0 ? Math.round(conversions * ri(18, 60) * (campaign === "Summer Sale" ? 1.4 : 1)) : 0;
+      sample.push({
+        id: uid() + p, date: date.toISOString().slice(0, 10), platform, campaign,
+        pillar: pillars[ri(0, pillars.length - 1)], postType,
+        title: titles[ri(0, titles.length - 1)],
+        reach, impressions, likes, comments, shares, saves,
+        videoViews: isVideo ? Math.round(reach * (0.8 + rnd() * 0.6)) : 0,
+        watchTime: isVideo ? Math.round((6 + rnd() * 40) * 10) / 10 : 0,
+        profileVisits: Math.round(reach * (0.01 + rnd() * 0.03)),
+        clicks, followersGained: Math.round(reach * (0.002 + rnd() * 0.006)),
+        followersLost: ri(0, 25), conversions, spend, revenue,
+        notes: rnd() > 0.8 ? "Boosted for 48h" : ""
+      });
+    }
+  }
+  const { error } = await sb.from("posts").insert(sample);
+  if (error) { console.error(error); toast("Failed to load sample — check console"); return; }
+  await loadRecords(); refresh();
+  toast(`Loaded ${sample.length} sample posts`);
+}
+
+/* ---------- 9. Shell: tabs, theme, toast, events, init ---------- */
+let toastTimer;
+function toast(msg) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $("#iconMoon").style.display = theme === "dark" ? "none" : "";
+  $("#iconSun").style.display  = theme === "dark" ? "" : "none";
+  storage.set(THEME_KEY, theme);
+}
+
+function countActiveFilters() {
+  const n = ["#fPlatform","#fCampaign","#fPillar","#fType","#fMonth","#fQuarter","#fYear","#fFrom","#fTo"]
+    .filter(id => $(id).value).length + ($("#searchInput").value.trim() ? 1 : 0);
+  $("#activeFilterCount").textContent = n ? `${n} filter${n > 1 ? "s" : ""} active` : "";
+}
+
+// Re-render everything from the current filters. Single source of truth.
+function refresh() {
+  populateFilterOptions();
+  countActiveFilters();
+  const rows = getFiltered();
+  const totals = aggregate(rows);
+  renderKPIs(rows, totals);
+  renderTable(rows);
+  renderCharts(rows);
+  renderBoards(rows);
+  renderInsights(rows);
+}
+
+function wireEvents() {
+  // Tabs
+  $$(".tab").forEach(tab => tab.addEventListener("click", () => {
+    $$(".tab").forEach(x => x.classList.toggle("active", x === tab));
+    $$(".section").forEach(s => s.classList.toggle("active", s.id === "tab-" + tab.dataset.tab));
+  }));
+  // Filters & search
+  ["#fPlatform","#fCampaign","#fPillar","#fType","#fMonth","#fQuarter","#fYear","#fFrom","#fTo"]
+    .forEach(id => $(id).addEventListener("change", refresh));
+  $("#searchInput").addEventListener("input", refresh);
+  $("#btnResetFilters").addEventListener("click", () => {
+    ["#fPlatform","#fCampaign","#fPillar","#fType","#fMonth","#fQuarter","#fYear","#fFrom","#fTo","#searchInput"]
+      .forEach(id => { $(id).value = ""; });
+    refresh();
+  });
+  // Entry modal
+  $$("[data-open-entry]").forEach(b => b.addEventListener("click", () => openModal()));
+  $("#btnCloseModal").addEventListener("click", closeModal);
+  $("#btnCancelEntry").addEventListener("click", closeModal);
+  $("#btnSaveEntry").addEventListener("click", submitEntry);
+  $("#entryModal").addEventListener("click", e => { if (e.target.id === "entryModal") closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+  // Table row actions (event delegation)
+  $("#tableBody").addEventListener("click", e => {
+    const edit = e.target.closest("[data-edit]"), del = e.target.closest("[data-del]");
+    if (edit) openModal(edit.dataset.edit);
+    if (del)  deleteEntry(del.dataset.del);
+  });
+  // Data management
+  const askSample = async () => {
+    if (records.length && !confirm("Add ~60 sample posts on top of your existing data?")) return;
+    await loadSample();
+  };
+  $("#btnSample").addEventListener("click", askSample);
+  $("#btnSample2").addEventListener("click", askSample);
+  $("#btnClearAll").addEventListener("click", async () => {
+    if (!records.length) return toast("There's no data to delete");
+    if (!confirm(`Delete all ${records.length} posts? This can't be undone.`)) return;
+    const { error } = await sb.from("posts").delete().neq("id", "__never__");
+    if (error) { console.error(error); toast("Failed to delete — check console"); return; }
+    await loadRecords(); refresh(); toast("All data deleted");
+  });
+  // Export
+  $("#btnExportCsv").addEventListener("click", exportCSV);
+  $("#btnExportJson").addEventListener("click", exportJSON);
+  $("#btnPrint").addEventListener("click", printReport);
+  // Theme
+  $("#btnTheme").addEventListener("click", () =>
+    setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+}
+
+async function init() {
+  const savedTheme = storage.get(THEME_KEY);
+  setTheme(savedTheme === "dark" || (!savedTheme && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+  wireEvents();
+  toast("Loading data…");
+  await loadRecords();
+  refresh();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
